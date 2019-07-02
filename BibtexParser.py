@@ -107,3 +107,10 @@ class BibtexParser:
 
     def use_url_in_title_as_href(self):
         self.use_field_in_field_as_href(from_field='url', to_field='title', keys=None, remove_from_field=True)
+
+    def use_href_from_title_as_url(self, keys=None):
+        if keys is None:
+            keys = self.get_all_keys()
+        for entry in self.entries:
+            if entry.key in keys:
+                entry.use_href_from_title_as_url()

@@ -6,6 +6,9 @@ class BibtexEntry:
         self.type = entryType
         self.fields = []
         self.contents = []
+        self.get_url_from_latex_url = re.compile(r'\\url{\s?(.*)\s?}')
+        self.get_url_from_href = re.compile(r'\\href{(.*?)}{.*?}')
+        self.get_title_from_href = re.compile(r'\\href{.*?}{(.*?)}')
 
     def set_field(self, field: str, content: str):
         if field in self.fields:
@@ -38,24 +41,43 @@ class BibtexEntry:
         self.contents = ordered_contents + remaining_contents
 
     def set_field_last(self, field: str):
-        if field not in self.fields: return
+        if field not in self.fields: return False
         idx = self.fields.index(field)
         self.fields.append(self.fields.pop(idx))
         self.contents.append(self.contents.pop(idx))
+        return True
 
     def use_field_in_field_as_href(self, from_field='url', to_field='title', remove_from_field=True):
         if not (from_field in self.fields and to_field in self.fields):
-            return
+            return False
         idx_from = self.fields.index(from_field)
         idx_to = self.fields.index(to_field)
         from_content = self.contents[idx_from]
         to_content = self.contents[idx_to]
         if '\\url{' in from_content:
-            from_content = re.search(r'\\url{\s?(.*)\s?}', from_content).group(1)
+            from_content = self.get_url_from_latex_url.search(from_content).group(1)
         self.contents[idx_to] = '\href{' + from_content + '}{' + to_content + '}'
         if remove_from_field:
             self.fields.pop(idx_from)
             self.contents.pop(idx_from)
+        return True
 
     def use_url_in_title_as_href(self):
         self.use_field_in_field_as_href(from_field='url', to_field='title', remove_from_field=True)
+
+    def use_href_from_title_as_url(self, replace=True, use_url_package=True):
+        if not 'title' in self.fields: return False
+        idx_title = self.fields.index('title')
+        url = self.get_url_from_href.search(self.contents[idx_title])
+        if url is None: return False
+        title = self.get_title_from_href.search(self.contents[idx_title])
+        if title is None: return False
+        title = title.group(1)
+        url = '\\url{' + url.group(1) + '}' if use_url_package else url.group(1)
+        if replace and 'url' in self.fields:
+            self.contents[self.fields.index('url')] = url
+        else:
+            self.fields.append('url')
+            self.contents.append(url)
+        self.contents[idx_title] = title
+        return True
