@@ -80,9 +80,16 @@ class BibtexParser:
                 output += '}\n\n'
                 file.write(output)
 
+    def get_all_keys(self):
+        return [entry.key for entry in self.entries]
+
+    def get_entry(self, key):
+        keys = self.get_all_keys()
+        return self.entries[keys.index(key)] if key in keys else None
+
     def set_order_of_fields(self, order=['title', 'author', 'journal', 'year'], keys=None):
         if keys is None:
-            keys = [entry.key for entry in self.entries]
+            keys = self.get_all_keys()
         for entry in self.entries:
             if entry.key in keys:
                 entry.set_order_of_fields(order)
@@ -93,7 +100,7 @@ class BibtexParser:
 
     def use_field_in_field_as_href(self, from_field='url', to_field='title', keys=None, remove_from_field=True):
         if keys is None:
-            keys = [entry.key for entry in self.entries]
+            keys = self.get_all_keys()
         for entry in self.entries:
             entry.use_field_in_field_as_href(from_field, to_field, remove_from_field)
 
