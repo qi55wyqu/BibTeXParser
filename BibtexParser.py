@@ -53,8 +53,6 @@ class BibtexParser:
                     field = self.regex_field_content.search(e)
                     if field:
                         dict = field.groupdict()
-                        if dict['field'] == 'title':
-                            print(dict)
                         bibtexEntry.set_field(dict['field'], dict['content'])
                 self.entries.append(bibtexEntry)
                 entry = ''
@@ -81,3 +79,10 @@ class BibtexParser:
                     output += '\n'
                 output += '}\n\n'
                 file.write(output)
+
+    def set_order_of_fields(self, order=['title', 'author', 'journal', 'year'], keys=None):
+        if keys is None:
+            keys = [entry.key for entry in self.entries]
+        for entry in self.entries:
+            if entry.key in keys:
+                entry.set_order_of_fields(order)
