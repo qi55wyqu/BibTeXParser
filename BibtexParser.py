@@ -102,7 +102,8 @@ class BibtexParser:
         if keys is None:
             keys = self.get_all_keys()
         for entry in self.entries:
-            entry.use_field_in_field_as_href(from_field, to_field, remove_from_field)
+            if entry.key in keys:
+                entry.use_field_in_field_as_href(from_field, to_field, remove_from_field)
 
     def use_url_in_title_as_href(self):
         self.use_field_in_field_as_href(from_field='url', to_field='title', keys=None, remove_from_field=True)
