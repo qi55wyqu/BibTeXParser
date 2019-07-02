@@ -11,3 +11,10 @@ class BibtexEntry:
         else:
             self.fields.append(field)
             self.contents.append(content)
+
+    def __str__(self):
+        str = self.type + ' ' + self.key + '\n'
+        for field, content in zip(self.fields, self.contents):
+            str += field + ' = ' + content + '\n'
+        str += '\n'
+        return str
