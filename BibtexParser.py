@@ -83,6 +83,12 @@ class BibtexParser:
     def append_entries(self, entries):
         self.entries += entries
 
+    def __str__(self):
+        str = ''
+        for entry in self.entries:
+            str += entry.__str__()
+        return str
+
     def get_all_keys(self):
         return [entry.key for entry in self.entries]
 
