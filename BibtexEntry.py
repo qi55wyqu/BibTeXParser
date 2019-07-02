@@ -1,3 +1,5 @@
+import re
+
 class BibtexEntry:
     def __init__(self, key: str, entryType='article'):
         self.key = key
@@ -35,8 +37,25 @@ class BibtexEntry:
         self.fields = ordered_fields + remaining_fields
         self.contents = ordered_contents + remaining_contents
 
-    def set_field_last(self, field):
+    def set_field_last(self, field: str):
         if field not in self.fields: return
         idx = self.fields.index(field)
         self.fields.append(self.fields.pop(idx))
         self.contents.append(self.contents.pop(idx))
+
+    def use_field_in_field_as_href(self, from_field='url', to_field='title', remove_from_field=True):
+        if not (from_field in self.fields and to_field in self.fields):
+            return
+        idx_from = self.fields.index(from_field)
+        idx_to = self.fields.index(to_field)
+        from_content = self.contents[idx_from]
+        to_content = self.contents[idx_to]
+        if '\\url{' in from_content:
+            from_content = re.search(r'\\url{\s?(.*)\s?}', from_content).group(1)
+        self.contents[idx_to] = '\href{' + from_content + '}{' + to_content + '}'
+        if remove_from_field:
+            self.fields.pop(idx_from)
+            self.contents.pop(idx_from)
+
+    def use_url_in_title_as_href(self):
+        self.use_field_in_field_as_href(from_field='url', to_field='title', remove_from_field=True)

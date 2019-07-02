@@ -90,3 +90,12 @@ class BibtexParser:
     def set_field_last(self, field):
         for entry in self.entries:
             entry.set_field_last(field)
+
+    def use_field_in_field_as_href(self, from_field='url', to_field='title', keys=None, remove_from_field=True):
+        if keys is None:
+            keys = [entry.key for entry in self.entries]
+        for entry in self.entries:
+            entry.use_field_in_field_as_href(from_field, to_field, remove_from_field)
+
+    def use_url_in_title_as_href(self):
+        self.use_field_in_field_as_href(from_field='url', to_field='title', keys=None, remove_from_field=True)
