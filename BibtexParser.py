@@ -156,3 +156,6 @@ class BibtexParser:
         for entry in self.entries:
             if entry.key in keys:
                 entry.use_href_from_title_as_url()
+
+    def sort_by_key(self, reverse=False):
+        self.entries.sort(key=lambda entry: entry.key, reverse=reverse)
