@@ -21,7 +21,7 @@ class BibtexEntry:
         str += '\n'
         return str
 
-    def set_order_of_fields(self, order=['title', 'author', 'journal', 'year']):
+    def set_order_of_fields(self, order):
         ordered_fields, ordered_contents = [], []
         remaining_fields, remaining_contents = [], []
         for sort_field in order:

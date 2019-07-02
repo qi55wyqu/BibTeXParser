@@ -87,7 +87,7 @@ class BibtexParser:
         keys = self.get_all_keys()
         return self.entries[keys.index(key)] if key in keys else None
 
-    def set_order_of_fields(self, order=['title', 'author', 'journal', 'year'], keys=None):
+    def set_order_of_fields(self, order, keys=None):
         if keys is None:
             keys = self.get_all_keys()
         for entry in self.entries:
