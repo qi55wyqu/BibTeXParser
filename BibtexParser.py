@@ -60,3 +60,24 @@ class BibtexParser:
                 entry = ''
                 opening_brackets, closing_brackets = 0, 0
         file.close()
+
+    def write(self, filename, pretty_print=True, append=False):
+        with open(filename, 'a+' if append else 'w+') as file:
+            for entry in self.entries:
+                output = ''
+                output += '@' + entry.type + '{' + entry.key + ',\n'
+                num_spaces = 0
+                if pretty_print:
+                    for field in entry.fields:
+                        if len(field) > num_spaces:
+                            num_spaces = len(field)
+                for i, (field, content) in enumerate(zip(entry.fields, entry.contents)):
+                    output += ' ' * 4 + field
+                    if pretty_print:
+                        output += ' ' * (num_spaces-len(field))
+                    output += ' = ' + '{' + content + '}'
+                    if i < len(entry.fields) - 1:
+                        output += ','
+                    output += '\n'
+                output += '}\n\n'
+                file.write(output)
