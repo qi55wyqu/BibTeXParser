@@ -86,3 +86,7 @@ class BibtexParser:
         for entry in self.entries:
             if entry.key in keys:
                 entry.set_order_of_fields(order)
+
+    def set_field_last(self, field):
+        for entry in self.entries:
+            entry.set_field_last(field)

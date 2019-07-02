@@ -34,3 +34,9 @@ class BibtexEntry:
             remaining_contents.append(self.contents[self.fields.index(field)])
         self.fields = ordered_fields + remaining_fields
         self.contents = ordered_contents + remaining_contents
+
+    def set_field_last(self, field):
+        if field not in self.fields: return
+        idx = self.fields.index(field)
+        self.fields.append(self.fields.pop(idx))
+        self.contents.append(self.contents.pop(idx))
