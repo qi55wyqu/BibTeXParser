@@ -173,3 +173,18 @@ class BibtexParser:
             if entry.type == type:
                 ret.append_entries([entry])
         return ret
+
+    def get_index_of_key(self, key):
+        if key not in self.get_all_keys():
+            return -1
+        for idx, entry in enumerate(self.entries):
+            if entry.key == key:
+                return idx
+
+    def remove_keys(self, keys):
+        all_keys = self.get_all_keys()
+        for key in keys:
+            if not key in all_keys: continue
+            idx = self.get_index_of_key(key)
+            if idx == -1: continue
+            self.entries.pop(idx)
