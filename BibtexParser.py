@@ -188,3 +188,11 @@ class BibtexParser:
             idx = self.get_index_of_key(key)
             if idx == -1: continue
             self.entries.pop(idx)
+
+    def remove_fields_from_keys(self, fields, keys=None):
+        if keys is None:
+            keys = self.get_all_keys()
+        for key in keys:
+            idx = self.get_index_of_key(key)
+            if idx == -1: continue
+            self.entries[idx].remove_fields(fields)

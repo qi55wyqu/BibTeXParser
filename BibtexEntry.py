@@ -93,3 +93,10 @@ class BibtexEntry:
             for replacement in replace_chars:
                 if replacement[1] in self.contents[idx]: continue
                 self.contents[idx] = self.contents[idx].replace(replacement[0], replacement[1])
+
+    def remove_fields(self, fields):
+        for field in fields:
+            if not field in self.fields: continue
+            idx = self.fields.index(field)
+            self.fields.pop(idx)
+            self.contents.pop(idx)
