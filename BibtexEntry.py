@@ -91,4 +91,5 @@ class BibtexEntry:
             if only_if_url_or_href and ('\\url{' not in self.contents[idx] and '\\href{' not in self.contents[idx]):
                 continue
             for replacement in replace_chars:
+                if replacement[1] in self.contents[idx]: continue
                 self.contents[idx] = self.contents[idx].replace(replacement[0], replacement[1])
