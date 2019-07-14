@@ -1,5 +1,6 @@
 import re
 import os
+from subprocess import Popen
 from BibtexEntry import BibtexEntry
 
 
@@ -199,3 +200,49 @@ class BibtexParser:
 
     def remove_fields(self, fields):
         self.remove_fields_from_keys(fields, keys=None)
+
+    def check_for_duplicates(self):
+        keys = self.get_all_keys()
+        counted_keys = []
+        count = []
+        for key in keys:
+            if not key in counted_keys:
+                counted_keys.append(key)
+                count.append(1)
+            else:
+                count[counted_keys.index(key)] += 1
+        duplicate_keys = []
+        for i, key in enumerate(counted_keys):
+            if count[i] > 1:
+                duplicate_keys.append(key)
+        return duplicate_keys
+
+    def create_pdf(self, output_filename, open_file=False):
+        output_filename, ext = os.path.splitext(output_filename)
+        ext = '.tex'
+        output_dir = os.path.dirname(output_filename)
+        if not os.path.isdir(output_dir):
+            os.mkdir(output_dir)
+        bib_filename = os.path.join(output_dir, 'references_tmp.bib')
+        tex = '\\documentclass{article}\n\n'
+        tex += '\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[english]{babel}\n\\usepackage{amsmath,amssymb}\n\\usepackage{xcolor}\n\\usepackage[backend=biber,sorting=none,style=reading]{biblatex}\n\\usepackage{hyperref}\n\\usepackage[margin=2cm, includefoot]{geometry}\n\n'
+        tex += '\\addbibresource[]{references_tmp.bib}\n\n'
+        tex += '\\hypersetup{\n\tcitecolor = black,\n\tfilecolor = black,\n\turlcolor = blue!50!black,\n\tpdfstartview = FitH\n}\n\n'
+        tex += '\\begin{document}\n\t\\nocite{*}\n\t\\printbibliography\n\end{document}\n'
+        self.write(bib_filename)
+        with open(output_filename + ext, 'w+', encoding='utf8') as out:
+            out.write(tex)
+        self.compile_tex_file(output_filename + ext)
+        self.run_biber(output_filename)
+        self.compile_tex_file(output_filename + ext)
+        self.compile_tex_file(output_filename + ext)
+        if open_file:
+            os.startfile(output_filename + '.pdf')
+
+    def compile_tex_file(self, output_filename):
+        proc = Popen(['pdflatex ', output_filename])
+        proc.communicate()
+
+    def run_biber(self, output_filename):
+        proc = Popen(['biber ', output_filename])
+        proc.communicate()
