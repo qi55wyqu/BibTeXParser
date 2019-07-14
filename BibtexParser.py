@@ -7,16 +7,16 @@ class BibtexParser:
     def __init__(self, entries=None):
         self.entries = [] if entries is None else entries
         # maybe space then @ then type then maybe space then { then maybe space then key then maybe space then ,
-        self.regex_type_key = re.compile(r'\s?@(?P<type>(.*?))\s?{\s?(?P<key>(.*?))\s?,')
+        self.regex_type_key = re.compile(r'\s*@(?P<type>(.*?))\s*{\s*(?P<key>(.*?))\s*,')
         # maybe space then field then maybe space then = then maybe space then content then maybe space then }
         # $ means: ends with
-        self.regex_field_content = re.compile(r'\s?(?P<field>(.*?))\s?=\s?{\s?(?P<content>(.*?))\s?}$')
+        self.regex_field_content = re.compile(r'^\s*(?P<field>(.*?))\s*=\s*{\s*(?P<content>(.*?))\s*}$')
 
     def parse(self, filename: str, append=False):
         assert os.path.isfile(filename)
         if not append:
             self.entries = []
-        file = open(filename, 'r')
+        file = open(filename, 'r', encoding='utf8')
         opening_brackets, closing_brackets = 0, 0
         entry = ''
         while True:
@@ -60,7 +60,7 @@ class BibtexParser:
         file.close()
 
     def write(self, filename: str, pretty_print=True, append=False):
-        with open(filename, 'a+' if append else 'w+') as file:
+        with open(filename, 'a+' if append else 'w+', encoding='utf8') as file:
             for entry in self.entries:
                 output = ''
                 output += '@' + entry.type + '{' + entry.key + ',\n'
@@ -159,3 +159,17 @@ class BibtexParser:
 
     def sort_by_key(self, reverse=False):
         self.entries.sort(key=lambda entry: entry.key, reverse=reverse)
+
+    def fix_special_characters(self, keys=None, fields=None, replace_chars=[['%', '\%'], ['&', '\&']], only_if_url_or_href=False):
+        if keys is None:
+            keys = self.get_all_keys()
+        for entry in self.entries:
+            if entry.key in keys:
+                entry.fix_special_characters(fields, replace_chars, only_if_url_or_href)
+
+    def get_entries_with_type(self, type):
+        ret = BibtexParser()
+        for entry in self.entries:
+            if entry.type == type:
+                ret.append_entries([entry])
+        return ret

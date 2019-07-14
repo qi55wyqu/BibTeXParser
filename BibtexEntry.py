@@ -6,7 +6,7 @@ class BibtexEntry:
         self.type = entryType
         self.fields = []
         self.contents = []
-        self.get_url_from_latex_url = re.compile(r'\\url{\s?(.*)\s?}')
+        self.get_url_from_latex_url = re.compile(r'\\url{\s*(.*)\s*}')
         self.get_url_from_href = re.compile(r'\\href{(.*?)}{.*?}')
         self.get_title_from_href = re.compile(r'\\href{.*?}{(.*?)}')
 
@@ -81,3 +81,14 @@ class BibtexEntry:
             self.contents.append(url)
         self.contents[idx_title] = title
         return True
+
+    def fix_special_characters(self, fields=None, replace_chars=[['%', '\%'],['&', '\&']], only_if_url_or_href=False):
+        if fields is None:
+            fields = self.fields
+        for field in fields:
+            if field not in self.fields: continue
+            idx = self.fields.index(field)
+            if only_if_url_or_href and ('\\url{' not in self.contents[idx] and '\\href{' not in self.contents[idx]):
+                continue
+            for replacement in replace_chars:
+                self.contents[idx] = self.contents[idx].replace(replacement[0], replacement[1])
