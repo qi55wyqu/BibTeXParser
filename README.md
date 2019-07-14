@@ -5,7 +5,7 @@
 pip install git+https://github.com/qi55wyqu/BibTeXParser.git
 ```
 
-### Usage example: 
+## Usage example: 
 
 ```python
 import os
