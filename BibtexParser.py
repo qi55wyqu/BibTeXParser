@@ -201,6 +201,11 @@ class BibtexParser:
     def remove_fields(self, fields):
         self.remove_fields_from_keys(fields, keys=None)
 
+    def remove_entries_with_type(self, type):
+        for i, entry in enumerate(self.entries):
+            if entry.type == type:
+                self.entries.pop(i)
+
     def check_for_duplicates(self):
         keys = self.get_all_keys()
         counted_keys = []
