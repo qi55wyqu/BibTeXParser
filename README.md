@@ -5,6 +5,11 @@
 pip install git+https://github.com/qi55wyqu/BibTeXParser.git
 ```
 
+## Update
+```
+pip install git+https://github.com/qi55wyqu/BibTeXParser.git --upgrade
+```
+
 ## Usage example: 
 
 ```python
