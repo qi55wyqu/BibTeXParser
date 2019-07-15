@@ -1,12 +1,12 @@
 # BibTeXParser
 
 ## Installation
-```
+```shell
 pip install git+https://github.com/qi55wyqu/BibTeXParser.git
 ```
 
 ## Update
-```
+```shell
 pip install git+https://github.com/qi55wyqu/BibTeXParser.git --upgrade
 ```
 
