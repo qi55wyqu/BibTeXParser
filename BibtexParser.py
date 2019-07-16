@@ -229,20 +229,23 @@ class BibtexParser:
         keys = []
         for file in files:
             if not os.path.isfile(file): continue
-            with open(file, 'r', encoding='utf8') as input_file:
-                while True:
-                    line = input_file.readline()
-                    if not line: break
-                    match = self.get_citation.search(line)
-                    if not match: continue
-                    matched_keys = match.groupdict()['keys']
-                    if not matched_keys: continue
-                    matched_keys = matched_keys.split(',')
-                    matched_keys = [key.strip() for key in matched_keys]
-                    for key in matched_keys:
-                        if key not in all_keys or key in keys: continue
-                        keys.append(key)
-                        out.append_entries([self.entries[all_keys.index(key)]])
+            try:
+                with open(file, 'r', encoding='utf8') as input_file:
+                    while True:
+                        line = input_file.readline()
+                        if not line: break
+                        match = self.get_citation.search(line)
+                        if not match: continue
+                        matched_keys = match.groupdict()['keys']
+                        if not matched_keys: continue
+                        matched_keys = matched_keys.split(',')
+                        matched_keys = [key.strip() for key in matched_keys]
+                        for key in matched_keys:
+                            if key not in all_keys or key in keys: continue
+                            keys.append(key)
+                            out.append_entries([self.entries[all_keys.index(key)]])
+            except UnicodeDecodeError:
+                continue
         return out
 
     def get_entries_cited_in_folders(self, folders, include_subfolders=False, file_extensions=['.tex']):
