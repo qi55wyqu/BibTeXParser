@@ -223,7 +223,7 @@ class BibtexParser:
                 duplicate_keys.append(key)
         return duplicate_keys
 
-    def get_entries_cited_in_files(self, files, exlude_comments=True):
+    def get_entries_cited_in_files(self, files):
         all_keys = self.get_all_keys()
         out = BibtexParser()
         keys = []
@@ -244,6 +244,23 @@ class BibtexParser:
                         keys.append(key)
                         out.append_entries([self.entries[all_keys.index(key)]])
         return out
+
+    def get_entries_cited_in_folders(self, folders, include_subfolders=False, file_extensions=['.tex']):
+        tex_files = []
+        def _append_file(file):
+            if os.path.isdir(file): return
+            _, ext = os.path.splitext(file)
+            if file_extensions is not None and ext not in file_extensions: return
+            tex_files.append(file)
+        for folder in folders:
+            if include_subfolders:
+                for root, dirs, files in os.walk(folder):
+                    for file in files:
+                        _append_file(os.path.join(root, file))
+            else:
+                for file in os.listdir(folder):
+                    _append_file(os.path.join(folder, file))
+        return self.get_entries_cited_in_files(tex_files)
 
     def create_pdf(self, output_filename, open_file=False):
         output_filename, ext = os.path.splitext(output_filename)
