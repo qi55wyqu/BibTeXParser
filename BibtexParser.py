@@ -12,6 +12,7 @@ class BibtexParser:
         # maybe space then field then maybe space then = then maybe space then content then maybe space then }
         # $ means: ends with
         self.regex_field_content = re.compile(r'^\s*(?P<field>(.*?))\s*=\s*{\s*(?P<content>(.*?))\s*}$')
+        self.get_citation = re.compile(r'(?<!\\)%.*|(\\(?:no)?cite\w*\{(?P<keys>((?!\*)[^{}]+))\})')
 
     def parse(self, filename: str, append=False):
         assert os.path.isfile(filename)
@@ -221,6 +222,28 @@ class BibtexParser:
             if count[i] > 1:
                 duplicate_keys.append(key)
         return duplicate_keys
+
+    def get_entries_cited_in_files(self, files, exlude_comments=True):
+        all_keys = self.get_all_keys()
+        out = BibtexParser()
+        keys = []
+        for file in files:
+            if not os.path.isfile(file): continue
+            with open(file, 'r', encoding='utf8') as input_file:
+                while True:
+                    line = input_file.readline()
+                    if not line: break
+                    match = self.get_citation.search(line)
+                    if not match: continue
+                    matched_keys = match.groupdict()['keys']
+                    if not matched_keys: continue
+                    matched_keys = matched_keys.split(',')
+                    matched_keys = [key.strip() for key in matched_keys]
+                    for key in matched_keys:
+                        if key not in all_keys or key in keys: continue
+                        keys.append(key)
+                        out.append_entries([self.entries[all_keys.index(key)]])
+        return out
 
     def create_pdf(self, output_filename, open_file=False):
         output_filename, ext = os.path.splitext(output_filename)
