@@ -7,11 +7,8 @@ from BibtexEntry import BibtexEntry
 class BibtexParser:
     def __init__(self, entries=None):
         self.entries = [] if entries is None else entries
-        # maybe space then @ then type then maybe space then { then maybe space then key then maybe space then ,
-        self.regex_type_key = re.compile(r'\s*@(?P<type>(.*?))\s*{\s*(?P<key>(.*?))\s*,')
-        # maybe space then field then maybe space then = then maybe space then content then maybe space then }
-        # $ means: ends with
-        self.regex_field_content = re.compile(r'^\s*(?P<field>(.*?))\s*=\s*{\s*(?P<content>(.*?))\s*}$')
+        self.regex_type_key = re.compile(r'\s*@(?P<type>(.*?))\s*\{\s*(?P<key>(.*?))\s*,')
+        self.regex_field_content = re.compile(r'^\s*(?P<field>(\w+))\s*=\s*\{(?P<content>(.*))\}')
         self.get_citation = re.compile(r'(?<!\\)%.*|(\\(?:no)?cite\w*\{(?P<keys>((?!\*)[^{}]+))\})')
 
     def parse(self, filename: str, append=False):

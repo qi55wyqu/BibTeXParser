@@ -6,9 +6,9 @@ class BibtexEntry:
         self.type = entryType
         self.fields = []
         self.contents = []
-        self.get_url_from_latex_url = re.compile(r'\\url{\s*(.*)\s*}')
-        self.get_url_from_href = re.compile(r'\\href{(.*?)}{.*?}')
-        self.get_title_from_href = re.compile(r'\\href{.*?}{(.*?)}')
+        self.get_url_from_latex_url = re.compile(r'\\url\{\s*(.*)\s*\}')
+        self.get_url_from_href = re.compile(r'\\href\{(.*)\}\{.*\}')
+        self.get_title_from_href = re.compile(r'\\href\{.*\}\{(.*)\}')
 
     def set_field(self, field: str, content: str):
         if field in self.fields:
@@ -82,7 +82,9 @@ class BibtexEntry:
         self.contents[idx_title] = title
         return True
 
-    def fix_special_characters(self, fields=None, replace_chars=[['%', '\%'],['&', '\&']], only_if_url_or_href=False):
+    def fix_special_characters(self, fields=None, replace_chars=None, only_if_url_or_href=False):
+        if replace_chars is None:
+            replace_chars = [['%', '\%'], ['&', '\&']]
         if fields is None:
             fields = self.fields
         for field in fields:
