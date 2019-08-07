@@ -96,7 +96,7 @@ class BibtexParser:
     def __str__(self):
         str = ''
         for entry in self.entries:
-            str += entry.__str__()
+            str += entry.__str__() + '\n'
         return str
 
     def get_all_keys(self):
@@ -149,12 +149,12 @@ class BibtexParser:
     def use_url_in_title_as_href(self):
         self.use_field_in_field_as_href(from_field='url', to_field='title', keys=None, remove_from_field=True)
 
-    def use_href_from_title_as_url(self, keys=None):
+    def use_href_from_title_as_url(self, keys=None, replace=True, use_url_package=True):
         if keys is None:
             keys = self.get_all_keys()
         for entry in self.entries:
             if entry.key in keys:
-                entry.use_href_from_title_as_url()
+                entry.use_href_from_title_as_url(replace, use_url_package)
 
     def sort_by_key(self, reverse=False):
         self.entries.sort(key=lambda entry: entry.key, reverse=reverse)
@@ -168,8 +168,9 @@ class BibtexParser:
 
     def get_entries_with_type(self, type):
         ret = BibtexParser()
+        type_lower = type.lower()
         for entry in self.entries:
-            if entry.type == type:
+            if entry.type.lower() == type_lower:
                 ret.append_entries([entry])
         return ret
 
@@ -200,8 +201,9 @@ class BibtexParser:
         self.remove_fields_from_keys(fields, keys=None)
 
     def remove_entries_with_type(self, type):
+        type_lower = type.lower()
         for i, entry in enumerate(self.entries):
-            if entry.type == type:
+            if entry.type.lower() == type_lower:
                 self.entries.pop(i)
 
     def check_for_duplicates(self):

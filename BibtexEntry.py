@@ -21,7 +21,6 @@ class BibtexEntry:
         str = self.type + ' ' + self.key + '\n'
         for field, content in zip(self.fields, self.contents):
             str += field + ' = ' + content + '\n'
-        str += '\n'
         return str
 
     def set_order_of_fields(self, order):
