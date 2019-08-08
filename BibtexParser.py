@@ -291,8 +291,9 @@ class BibtexParser:
                 os.remove(output_filename + ext)
             except Exception as ee:
                 continue
-        if pdf_created and open_file:
-            self._start_file(output_filename + '.pdf')
+        if pdf_created:
+            if open_file:
+                self._start_file(output_filename + '.pdf')
         else:
             try:
                 os.remove(output_filename + '.pdf')
