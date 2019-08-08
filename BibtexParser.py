@@ -1,6 +1,7 @@
 import re
 import os
-from subprocess import Popen
+import subprocess
+import platform
 from BibtexEntry import BibtexEntry
 
 
@@ -274,22 +275,48 @@ class BibtexParser:
         tex = '\\documentclass{article}\n\n'
         tex += '\\usepackage[utf8]{inputenc}\n\\usepackage[T1]{fontenc}\n\\usepackage[english]{babel}\n\\usepackage{amsmath,amssymb}\n\\usepackage{xcolor}\n\\usepackage[backend=biber,sorting=none,style=reading]{biblatex}\n\\usepackage{hyperref}\n\\usepackage[margin=2cm, includefoot]{geometry}\n\n'
         tex += '\\addbibresource[]{references_tmp.bib}\n\n'
-        tex += '\\hypersetup{\n\tcitecolor = black,\n\tfilecolor = black,\n\turlcolor = blue!50!black,\n\tpdfstartview = FitH\n}\n\n'
+        tex += '\\hypersetup{\n\tcolorlinks,\n\tcitecolor = black,\n\tfilecolor = black,\n\turlcolor = blue!50!black,\n\tpdfstartview = FitH\n}\n\n'
         tex += '\\begin{document}\n\t\\nocite{*}\n\t\\printbibliography\n\end{document}\n'
         self.write(bib_filename)
         with open(output_filename + ext, 'w+', encoding='utf8') as out:
             out.write(tex)
-        self.compile_tex_file(output_filename + ext)
-        self.run_biber(output_filename)
-        self.compile_tex_file(output_filename + ext)
-        self.compile_tex_file(output_filename + ext)
-        if open_file:
-            os.startfile(output_filename + '.pdf')
+        self._compile_tex_file(output_filename + ext)
+        self._run_biber(output_filename)
+        self._compile_tex_file(output_filename + ext)
+        returncode = self._compile_tex_file(output_filename + ext)
+        pdf_created = returncode == 0
+        os.remove(bib_filename)
+        for ext in ['.tex', '.log', '.aux', '.bcf', '.out', '.run.xml', '.bbl', '.blg']:
+            try:
+                os.remove(output_filename + ext)
+            except Exception as ee:
+                continue
+        if pdf_created and open_file:
+            self._start_file(output_filename + '.pdf')
+        else:
+            try:
+                os.remove(output_filename + '.pdf')
+            except Exception as e:
+                pass
+        return pdf_created
 
-    def compile_tex_file(self, output_filename):
-        proc = Popen(['pdflatex ', output_filename])
+    @staticmethod
+    def _compile_tex_file(output_filename):
+        proc = subprocess.Popen(['pdflatex', '-interaction=nonstopmode', '-halt-on-error', output_filename], stdout=None)
         proc.communicate()
+        return proc.returncode
 
-    def run_biber(self, output_filename):
-        proc = Popen(['biber ', output_filename])
+    @staticmethod
+    def _run_biber(output_filename):
+        proc = subprocess.Popen(['biber', output_filename], stdout=None)
         proc.communicate()
+        return proc.returncode
+
+    @staticmethod
+    def _start_file(filename):
+        if platform.system() == 'Darwin':  # macOS
+            subprocess.call(('open', filename))
+        elif platform.system() == 'Windows':  # Windows
+            os.startfile(filename)
+        else:  # linux variants
+            subprocess.call(('xdg-open', filename))
