@@ -160,7 +160,9 @@ class BibtexParser:
     def sort_by_key(self, reverse=False):
         self.entries.sort(key=lambda entry: entry.key, reverse=reverse)
 
-    def fix_special_characters(self, keys=None, fields=None, replace_chars=[['%', '\%'], ['&', '\&']], only_if_url_or_href=False):
+    def fix_special_characters(self, keys=None, fields=None, replace_chars=None, only_if_url_or_href=False):
+        if replace_chars is None:
+            replace_chars = [['%', '\%'], ['&', '\&']]
         if keys is None:
             keys = self.get_all_keys()
         for entry in self.entries:
@@ -248,7 +250,9 @@ class BibtexParser:
                 continue
         return out
 
-    def get_entries_cited_in_folders(self, folders, include_subfolders=False, file_extensions=['.tex']):
+    def get_entries_cited_in_folders(self, folders, include_subfolders=False, file_extensions=None):
+        if file_extensions is None:
+            file_extensions = ['.tex']
         tex_files = []
         def _append_file(file):
             if os.path.isdir(file): return
@@ -264,6 +268,18 @@ class BibtexParser:
                 for file in os.listdir(folder):
                     _append_file(os.path.join(folder, file))
         return self.get_entries_cited_in_files(tex_files)
+
+    def get_keys_cited_in_files(self, files):
+        return [entry.key for entry in self.get_entries_cited_in_files(files)]
+
+    def get_string_of_keys_cited_in_files(self, files):
+        return ', '.join(self.get_keys_cited_in_files(files))
+
+    def get_keys_cited_in_folder(self, folders, include_subfolders=False, file_extensions=None):
+        return [entry.keys for entry in self.get_entries_cited_in_folders(folders, include_subfolders, file_extensions)]
+
+    def get_string_of_keys_cited_in_files(self, folders, include_subfolders=False, file_extensions=None):
+        return ', '.join(self.get_keys_cited_in_folder(folders, include_subfolders, file_extensions))
 
     def create_pdf(self, output_filename, open_file=False):
         output_filename, ext = os.path.splitext(output_filename)
