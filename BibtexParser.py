@@ -11,6 +11,7 @@ class BibtexParser:
         self.regex_type_key = re.compile(r'\s*@(?P<type>(.*?))\s*\{\s*(?P<key>(.*?))\s*,')
         self.regex_field_content = re.compile(r'^\s*(?P<field>(\w+))\s*=\s*\{(?P<content>(.*))\}')
         self.get_citation = re.compile(r'(?<!\\)%.*|(\\(?:no)?cite\w*\{(?P<keys>((?!\*)[^{}]+))\})')
+        self.current_iter = 0
 
     def parse(self, filename: str, append=False):
         assert os.path.isfile(filename)
@@ -94,11 +95,79 @@ class BibtexParser:
                 else:
                     self.entries.append(entry)
 
+    def append_entry(self, entry):
+        self.entries += [entry]
+
+    def add_endtry(self, entry, replace=True):
+        self.add_entries([entry], replace)
+
     def __str__(self):
         str = ''
         for entry in self.entries:
             str += entry.__str__() + '\n'
         return str
+
+    def __name__(self):
+        return 'BibtexParser'
+
+    def __add__(self, other):
+        entries = self.entries.copy()
+        bibtex = BibtexParser(entries)
+        if isinstance(other, BibtexEntry):
+            bibtex.add_endtry(other, replace=False)
+        elif isinstance(other, BibtexParser):
+            for entry in other:
+                bibtex.append_entry(entry)
+        else:
+            raise ValueError('added object must be BibtexEntry or BibtexParser')
+        return bibtex
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __iadd__(self, other):
+        if isinstance(other, BibtexEntry):
+            self.add_endtry(other, replace=False)
+        elif isinstance(other, BibtexParser):
+            for entry in other:
+                self.append_entry(entry)
+        else:
+            raise ValueError('added object must be BibtexEntry or BibtexParser')
+        return self
+
+    def __iter__(self):
+        self.current_iter = 0
+        return self
+
+    def __next__(self):
+        if self.current_iter < len(self.entries):
+            self.current_iter += 1
+            return self.entries[self.current_iter-1]
+        else:
+            raise StopIteration
+
+    def __getitem__(self, index):
+        return self.entries[index]
+
+    def __setitem__(self, index, entry):
+        self.entries[index] = entry
+
+    def __len__(self):
+        return len(self.entries)
+
+    def __contains__(self, item):
+        if type(item) == str:
+            return item in self.get_all_keys()
+        elif isinstance(item, BibtexEntry):
+            return item in self.entries
+        return False
+
+    def __delitem__(self, item):
+        keys = self.get_all_keys()
+        if type(item) == str and item in keys:
+            del self.entries[keys.index(item)]
+        elif type(item).__name__ == 'BibtexEntry' and item in self:
+            del item
 
     def get_all_keys(self):
         return [entry.key for entry in self.entries]

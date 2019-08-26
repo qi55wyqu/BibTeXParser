@@ -17,11 +17,23 @@ class BibtexEntry:
             self.fields.append(field)
             self.contents.append(content)
 
+    def __name__(self):
+        return 'BibtexEntry'
+
     def __str__(self):
         str = self.type + ' ' + self.key + '\n'
         for field, content in zip(self.fields, self.contents):
             str += field + ' = ' + content + '\n'
         return str
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __getattr__(self, field):
+        if field in self.__dict__['fields']:
+            return self.__dict__['contents'][self.__dict__['fields'].index(field)]
+        else:
+             raise AttributeError('Entry has no field ' + field)
 
     def set_order_of_fields(self, order):
         ordered_fields, ordered_contents = [], []
