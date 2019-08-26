@@ -169,6 +169,14 @@ class BibtexParser:
         elif type(item).__name__ == 'BibtexEntry' and item in self:
             del item
 
+    def __copy__(self):
+        return BibtexParser(self.entries)
+
+    def __deepcopy__(self, memo={}):
+        bibtex = BibtexParser()
+        bibtex.entries += [entry.__deepcopy__() for entry in self.entries]
+        return bibtex
+
     def get_all_keys(self):
         return [entry.key for entry in self.entries]
 

@@ -35,6 +35,18 @@ class BibtexEntry:
         else:
              raise AttributeError('Entry has no field ' + field)
 
+    def __copy__(self):
+        entry = BibtexEntry(key=self.key, entryType=self.type)
+        entry.fields = self.fields
+        entry.contents = self.contents
+        return entry
+
+    def __deepcopy__(self, memo={}):
+        entry = BibtexEntry(key=self.key, entryType=self.type)
+        entry.fields = self.fields.copy()
+        entry.contents = self.contents.copy()
+        return entry
+
     def set_order_of_fields(self, order):
         ordered_fields, ordered_contents = [], []
         remaining_fields, remaining_contents = [], []
