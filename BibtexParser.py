@@ -70,12 +70,12 @@ class BibtexParser:
                     for field in entry.fields:
                         if len(field) > num_spaces:
                             num_spaces = len(field)
-                for i, (field, content) in enumerate(zip(entry.fields, entry.contents)):
+                for i, field in enumerate(entry.fields):
                     output += ' ' * 4 + field
                     if pretty_print:
                         output += ' ' * (num_spaces-len(field))
-                    output += ' = ' + '{' + content + '}'
-                    if i < len(entry.fields) - 1:
+                    output += ' = ' + '{' + entry.fields[field] + '}'
+                    if i < len(entry) - 1:
                         output += ','
                     output += '\n'
                 output += '}\n\n'
@@ -217,15 +217,19 @@ class BibtexParser:
         for entry in self.entries:
             entry.set_field_last(field)
 
-    def use_field_in_field_as_href(self, from_field='url', to_field='title', keys=None, remove_from_field=True):
+    def use_field_in_field_as_href(self, from_field='url', to_field='title', keys=None, remove_from_field=True, exclude_types=None):
         if keys is None:
             keys = self.get_all_keys()
+        if exclude_types is None:
+            exclude_types = []
+        exclude_types = [tpe.lower() for tpe in exclude_types]
         for entry in self.entries:
             if entry.key in keys:
-                entry.use_field_in_field_as_href(from_field, to_field, remove_from_field)
+                if entry.type.lower() not in exclude_types:
+                    entry.use_field_in_field_as_href(from_field, to_field, remove_from_field)
 
     def use_url_in_title_as_href(self):
-        self.use_field_in_field_as_href(from_field='url', to_field='title', keys=None, remove_from_field=True)
+        self.use_field_in_field_as_href(from_field='url', to_field='title', keys=None, remove_from_field=True, exclude_types=None)
 
     def use_href_from_title_as_url(self, keys=None, replace=True, use_url_package=True):
         if keys is None:
@@ -355,7 +359,7 @@ class BibtexParser:
     def get_keys_cited_in_folder(self, folders, include_subfolders=False, file_extensions=None):
         return [entry.keys for entry in self.get_entries_cited_in_folders(folders, include_subfolders, file_extensions)]
 
-    def get_string_of_keys_cited_in_files(self, folders, include_subfolders=False, file_extensions=None):
+    def get_string_of_keys_cited_in_folder(self, folders, include_subfolders=False, file_extensions=None):
         return ', '.join(self.get_keys_cited_in_folder(folders, include_subfolders, file_extensions))
 
     def create_pdf(self, output_filename, open_file=False):
